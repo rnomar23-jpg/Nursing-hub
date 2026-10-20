@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>اختبارات | تمريض هب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F6F7; --surface:#FFFFFF; --ink:#12303A; --muted:#4F6872;
+  --line:#D3E0E3; --accent:#0E7C86; --accent-ink:#FFFFFF; --soft:#DCEFF1;
+  --ok:#1B7F4B; --okbg:#DDF3E6; --bad:#B3261E; --badbg:#FBE3E1;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0E1D22; --surface:#15292F; --ink:#E6F1F3; --muted:#9DB6BD;
+    --line:#26414A; --accent:#4FC3CD; --accent-ink:#0E1D22; --soft:#1B3840;
+    --ok:#7BDDA5; --okbg:#173B29; --bad:#FF9D96; --badbg:#44201D;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif;
+  line-height:1.8; font-size:17px;
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);
+}
+.wrap{max-width:720px; margin:0 auto; padding:0 20px 40px}
+header.top{display:flex; align-items:center; justify-content:space-between; padding:16px 0}
+.brand{font-weight:700; font-size:20px; color:inherit; text-decoration:none}
+h1{font-size:clamp(26px,7vw,38px); line-height:1.3; margin:10px 0 6px}
+.lead{color:var(--muted); margin:0 0 20px}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 22px}
+button{font:inherit; color:inherit; cursor:pointer}
+.chip{
+  padding:8px 16px; border-radius:999px; border:1px solid var(--line);
+  background:var(--surface); min-height:44px;
+}
+.chip[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600}
+.progress{color:var(--muted); font-size:15px; margin:0 0 6px}
+.question{font-size:20px; font-weight:600; margin:0 0 14px; line-height:1.6}
+.opts{display:grid; gap:10px; margin:0 0 16px}
+.opt{
+  text-align:start; padding:12px 16px; min-height:52px; border-radius:12px;
+  border:1px solid var(--line); background:var(--surface);
+}
+.opt.ok{background:var(--okbg); border-color:var(--ok); color:var(--ok); font-weight:600}
+.opt.bad{background:var(--badbg); border-color:var(--bad); color:var(--bad); font-weight:600}
+.opt:disabled{cursor:default}
+.explain{padding:12px 16px; border-inline-start:4px solid var(--accent); background:var(--surface); color:var(--muted); font-size:16px; margin:0 0 16px}
+.next{
+  background:var(--accent); color:var(--accent-ink); border:0; border-radius:999px;
+  padding:10px 26px; font-weight:600; min-height:46px;
+}
+.score{font-size:26px; font-weight:700; margin:0 0 8px}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+.note{margin:34px 0 0; font-size:14px; color:var(--muted)}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="brand" href="index.html">تمريض هب</a></header>
+
+  <h1>اختبارات</h1>
+  <p class="lead">اختار المادة وابدأ. كل سؤال بيظهر لك إجابته وتفسيرها مباشرة.</p>
+
+  <div class="chips" id="chips" role="group" aria-label="المواد"></div>
+
+  <section id="quiz" hidden>
+    <p class="progress" id="progress"></p>
+    <p class="question" id="question"></p>
+    <div class="opts" id="opts"></div>
+    <p class="explain" id="explain" hidden></p>
+    <button class="next" id="next" hidden></button>
+  </section>
+
+  <section id="result" hidden>
+    <p class="score" id="score"></p>
+    <p class="lead" id="scoreMsg"></p>
+    <button class="next" id="again">ابدأ من الأول</button>
+  </section>
+
+  <p class="note">الأسئلة هنا تجريبية للتعلّم والمراجعة، وراجع دايمًا المرجع المعتمد في كليتك.</p>
+</div>
+
+<script>
+const BANK = {
+  basics: { title: "مهارات أساسية", q: [
+    { q: "ما المعدل الطبيعي لضربات القلب عند البالغ أثناء الراحة؟",
+      o: ["من 60 إلى 100 نبضة في الدقيقة", "من 30 إلى 50 نبضة في الدقيقة", "من 110 إلى 140 نبضة في الدقيقة", "من 150 إلى 180 نبضة في الدقيقة"],
+      a: 0, e: "المعدل الطبيعي للبالغ أثناء الراحة يقع بين 60 و100 نبضة في الدقيقة." },
+    { q: "ما المعدل الطبيعي للتنفس عند البالغ أثناء الراحة؟",
+      o: ["من 4 إلى 8 مرات في الدقيقة", "من 12 إلى 20 مرة في الدقيقة", "من 25 إلى 35 مرة في الدقيقة", "من 40 إلى 50 مرة في الدقيقة"],
+      a: 1, e: "المعدل الطبيعي للبالغ من 12 إلى 20 نفس في الدقيقة." },
+    { q: "أي من هذه اللحظات تُعد من لحظات نظافة اليدين الخمس؟",
+      o: ["بعد شرب الماء", "قبل ملامسة المريض", "بعد كتابة الملاحظات", "قبل دخول غرفة الاستراحة"],
+      a: 1, e: "من اللحظات الخمس: قبل ملامسة المريض، وقبل الإجراء المعقم، وبعد التعرض لسوائل الجسم، وبعد ملامسة المريض، وبعد ملامسة محيط المريض." }
+  ]},
+  peds: { title: "تمريض الأطفال", q: [
+    { q: "ما المعدل الطبيعي لتنفس حديث الولادة؟",
+      o: ["من 10 إلى 15 مرة في الدقيقة", "من 30 إلى 60 مرة في الدقيقة", "من 70 إلى 90 مرة في الدقيقة", "من 12 إلى 20 مرة في الدقيقة"],
+      a: 1, e: "حديث الولادة يتنفس أسرع من البالغ، والمعدل الطبيعي من 30 إلى 60 مرة في الدقيقة." },
+    { q: "ما موضع الحقن العضلي المناسب للرضيع؟",
+      o: ["العضلة الدالية في الكتف", "العضلة الألوية في الأرداف", "العضلة الوحشية الواسعة في الفخذ", "عضلة الساعد"],
+      a: 2, e: "الفخذ الأمامي الوحشي (العضلة الوحشية الواسعة) هو الموضع المفضل للرضع لأن عضلاته أكثر نموًا من الكتف والأرداف." },
+    { q: "أي علامة تدل على الجفاف عند الرضيع؟",
+      o: ["اليافوخ الأمامي غائر", "اليافوخ الأمامي منتفخ", "كثرة تغيير الحفاضات المبللة", "الأغشية المخاطية رطبة"],
+      a: 0, e: "غؤور اليافوخ الأمامي من علامات الجفاف، ومعه قلة التبول وجفاف الفم وقلة الدموع." }
+  ]},
+  ob: { title: "نساء وتوليد", q: [
+    { q: "ما المعدل الطبيعي لضربات قلب الجنين؟",
+      o: ["من 60 إلى 100 نبضة في الدقيقة", "من 110 إلى 160 نبضة في الدقيقة", "من 180 إلى 220 نبضة في الدقيقة", "من 40 إلى 60 نبضة في الدقيقة"],
+      a: 1, e: "المعدل الطبيعي لقلب الجنين من 110 إلى 160 نبضة في الدقيقة." },
+    { q: "كم تقريبًا مدة الحمل الطبيعي محسوبة من أول يوم في آخر دورة؟",
+      o: ["20 أسبوعًا", "30 أسبوعًا", "40 أسبوعًا", "50 أسبوعًا"],
+      a: 2, e: "مدة الحمل الكاملة حوالي 40 أسبوعًا، ويُعتبر الحمل مكتمل المدة من 37 أسبوعًا." },
+    { q: "أي من هذه العلامات تستدعي طلب رعاية طبية فورية أثناء الحمل؟",
+      o: ["غثيان خفيف في الصباح", "كثرة التبول", "نزول دم من المهبل", "تعب خفيف في آخر اليوم"],
+      a: 2, e: "النزيف المهبلي أثناء الحمل علامة خطر تحتاج تقييمًا طبيًا فوريًا." }
+  ]}
+};
+
+const chips = document.getElementById("chips");
+const quiz = document.getElementById("quiz");
+const result = document.getElementById("result");
+const el = id => document.getElementById(id);
+let key = null, i = 0, score = 0;
+
+Object.keys(BANK).forEach(k => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = BANK[k].title; b.setAttribute("aria-pressed", "false");
+  b.addEventListener("click", () => start(k));
+  chips.appendChild(b);
+});
+
+function start(k){
+  key = k; i = 0; score = 0;
+  [...chips.children].forEach((c, n) => c.setAttribute("aria-pressed", String(Object.keys(BANK)[n] === k)));
+  result.hidden = true; quiz.hidden = false;
+  show();
+}
+
+function show(){
+  const set = BANK[key].q, item = set[i];
+  el("progress").textContent = "سؤال " + (i + 1) + " من " + set.length;
+  el("question").textContent = item.q;
+  el("explain").hidden = true; el("next").hidden = true;
+  const box = el("opts"); box.innerHTML = "";
+  item.o.forEach((text, n) => {
+    const b = document.createElement("button");
+    b.className = "opt"; b.textContent = text;
+    b.addEventListener("click", () => answer(n));
+    box.appendChild(b);
+  });
+}
+
+function answer(n){
+  const set = BANK[key].q, item = set[i];
+  const btns = [...el("opts").children];
+  btns.forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.a){ b.classList.add("ok"); b.textContent = "✓ " + b.textContent; }
+    else if (idx === n){ b.classList.add("bad"); b.textContent = "✗ " + b.textContent; }
+  });
+  if (n === item.a) score++;
+  el("explain").textContent = item.e; el("explain").hidden = false;
+  el("next").textContent = i + 1 < set.length ? "السؤال التالي" : "شوف النتيجة";
+  el("next").hidden = false;
+}
+
+el("next").addEventListener("click", () => {
+  if (i + 1 < BANK[key].q.length){ i++; show(); }
+  else finish();
+});
+
+function finish(){
+  const total = BANK[key].q.length;
+  quiz.hidden = true; result.hidden = false;
+  el("score").textContent = "نتيجتك: " + score + " من " + total;
+  el("scoreMsg").textContent = score === total ? "ممتاز، كل إجاباتك صح." : "راجع الأسئلة اللي غلطت فيها وجرّب تاني.";
+}
+el("again").addEventListener("click", () => start(key));
+</script>
+</body>
+</html>
