@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>حسابي | تمريض هب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F6F7; --surface:#FFFFFF; --ink:#12303A; --muted:#4F6872;
+  --line:#D3E0E3; --accent:#0E7C86; --accent-ink:#FFFFFF; --soft:#DCEFF1;
+  --ok:#1B7F4B; --okbg:#DDF3E6; --bad:#B3261E; --badbg:#FBE3E1;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0E1D22; --surface:#15292F; --ink:#E6F1F3; --muted:#9DB6BD;
+    --line:#26414A; --accent:#4FC3CD; --accent-ink:#0E1D22; --soft:#1B3840;
+    --ok:#7BDDA5; --okbg:#173B29; --bad:#FF9D96; --badbg:#44201D;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif;
+  line-height:1.8; font-size:17px;
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);
+}
+.wrap{max-width:480px; margin:0 auto; padding:0 20px 40px}
+header.top{display:flex; align-items:center; justify-content:space-between; padding:16px 0}
+.brand{font-weight:700; font-size:20px; color:inherit; text-decoration:none}
+h1{font-size:clamp(26px,7vw,34px); line-height:1.3; margin:10px 0 6px}
+.lead{color:var(--muted); margin:0 0 20px}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+.tabs{display:flex; gap:8px; margin:0 0 18px}
+.tab{flex:1; min-height:46px; border-radius:999px; border:1px solid var(--line); background:var(--surface)}
+.tab[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600}
+label{display:block; font-weight:600; margin:0 0 4px}
+input{
+  width:100%; background:var(--surface); border:1px solid var(--line);
+  border-radius:12px; padding:12px 16px; min-height:50px; margin:0 0 14px;
+}
+input[type="email"],input[type="password"]{direction:ltr; text-align:left}
+.submit{
+  width:100%; min-height:50px; border:0; border-radius:999px;
+  background:var(--accent); color:var(--accent-ink); font-weight:700;
+}
+.submit:disabled{opacity:.6; cursor:default}
+.msg{padding:12px 16px; border-radius:12px; margin:0 0 14px; font-size:16px}
+.msg.err{background:var(--badbg); color:var(--bad)}
+.msg.ok{background:var(--okbg); color:var(--ok)}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px 16px}
+.email{direction:ltr; text-align:start; font-weight:600; word-break:break-all}
+.out{background:var(--soft); color:var(--ink); border:0; border-radius:999px; min-height:46px; padding:8px 24px; font-weight:600; margin-top:12px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+.note{margin:26px 0 0; font-size:14px; color:var(--muted)}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="brand" href="index.html">تمريض هب</a></header>
+
+  <section id="guest">
+    <h1>حسابي</h1>
+    <p class="lead">سجّل دخولك أو اعمل حساب جديد مجانًا.</p>
+    <div class="tabs" role="group" aria-label="نوع العملية">
+      <button class="tab" id="tabIn" aria-pressed="true" type="button">تسجيل الدخول</button>
+      <button class="tab" id="tabUp" aria-pressed="false" type="button">حساب جديد</button>
+    </div>
+    <p class="msg" id="msg" hidden role="status"></p>
+    <form id="form" novalidate>
+      <label for="email">الإيميل</label>
+      <input id="email" type="email" autocomplete="email" inputmode="email" required>
+      <label for="pass">كلمة السر</label>
+      <input id="pass" type="password" autocomplete="current-password" minlength="8" required>
+      <button class="submit" id="go" type="submit">دخول</button>
+    </form>
+  </section>
+
+  <section id="user" hidden>
+    <h1>أهلًا بيك</h1>
+    <div class="card">
+      <p class="lead" style="margin:0">أنت مسجّل دخول بالإيميل:</p>
+      <p class="email" id="who"></p>
+      <button class="out" id="logout" type="button">تسجيل الخروج</button>
+    </div>
+    <p style="margin-top:18px"><a href="index.html">الرجوع للصفحة الرئيسية</a></p>
+  </section>
+
+  <p class="note">بنستخدم الإيميل لتسجيل الدخول فقط، ومش بنشاركه مع حد.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const cfg = window.NH_CONFIG || {};
+const ready = cfg.SUPABASE_URL && cfg.SUPABASE_KEY && !String(cfg.SUPABASE_URL).startsWith("PASTE");
+let mode = "in", sb = null;
+
+function say(text, kind){
+  const m = $("msg");
+  if (!text){ m.hidden = true; return; }
+  m.textContent = text; m.className = "msg " + kind; m.hidden = false;
+}
+
+function arabicError(e){
+  const t = (e && e.message || "").toLowerCase();
+  if (t.includes("invalid login")) return "الإيميل أو كلمة السر غلط.";
+  if (t.includes("already registered")) return "الإيميل ده مسجّل قبل كده. جرّب تسجيل الدخول.";
+  if (t.includes("password should be")) return "كلمة السر لازم تكون 8 حروف أو أكتر.";
+  if (t.includes("valid email") || t.includes("invalid email")) return "اكتب إيميل صحيح.";
+  if (t.includes("rate limit") || t.includes("too many")) return "محاولات كتير. استنى شوية وجرّب تاني.";
+  if (t.includes("not confirmed")) return "لازم تأكد الإيميل الأول من الرسالة اللي وصلتلك.";
+  return "حصلت مشكلة. جرّب تاني بعد شوية.";
+}
+
+function setMode(m){
+  mode = m;
+  $("tabIn").setAttribute("aria-pressed", String(m === "in"));
+  $("tabUp").setAttribute("aria-pressed", String(m === "up"));
+  $("go").textContent = m === "in" ? "دخول" : "إنشاء الحساب";
+  $("pass").autocomplete = m === "in" ? "current-password" : "new-password";
+  say("");
+}
+
+function render(session){
+  const on = !!(session && session.user);
+  $("guest").hidden = on; $("user").hidden = !on;
+  if (on) $("who").textContent = session.user.email;
+}
+
+$("tabIn").addEventListener("click", () => setMode("in"));
+$("tabUp").addEventListener("click", () => setMode("up"));
+
+$("form").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if (!sb){ say("إعدادات الموقع لسه ماتضافتش.", "err"); return; }
+  const email = $("email").value.trim(), password = $("pass").value;
+  if (!email || password.length < 8){ say("اكتب الإيميل وكلمة سر من 8 حروف على الأقل.", "err"); return; }
+  $("go").disabled = true; say("");
+  try{
+    if (mode === "in"){
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) say(arabicError(error), "err");
+    } else {
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if (error) say(arabicError(error), "err");
+      else if (!data.session) say("تم إنشاء الحساب. افتح رسالة التأكيد على إيميلك وبعدين سجّل دخولك.", "ok");
+    }
+  } catch(e){ say("مفيش اتصال بالإنترنت أو حصلت مشكلة. جرّب تاني.", "err"); }
+  $("go").disabled = false;
+});
+
+$("logout").addEventListener("click", async () => { if (sb) await sb.auth.signOut(); });
+
+if (!ready || !window.supabase){
+  say("إعدادات الموقع لسه ماتضافتش.", "err");
+} else {
+  sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
+  sb.auth.getSession().then(({ data }) => render(data.session));
+  sb.auth.onAuthStateChange((_e, session) => render(session));
+}
+</script>
+</body>
+</html>

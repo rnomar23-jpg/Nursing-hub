@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الملفات والمذكرات | تمريض هب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F6F7; --surface:#FFFFFF; --ink:#12303A; --muted:#4F6872;
+  --line:#D3E0E3; --accent:#0E7C86; --accent-ink:#FFFFFF; --soft:#DCEFF1;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0E1D22; --surface:#15292F; --ink:#E6F1F3; --muted:#9DB6BD;
+    --line:#26414A; --accent:#4FC3CD; --accent-ink:#0E1D22; --soft:#1B3840;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif;
+  line-height:1.8; font-size:17px;
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);
+}
+.wrap{max-width:720px; margin:0 auto; padding:0 20px 40px}
+header.top{display:flex; align-items:center; justify-content:space-between; padding:16px 0}
+.brand{font-weight:700; font-size:20px; color:inherit; text-decoration:none}
+h1{font-size:clamp(26px,7vw,38px); line-height:1.3; margin:10px 0 6px}
+.lead{color:var(--muted); margin:0 0 18px}
+input[type="search"]{
+  width:100%; font:inherit; color:inherit; background:var(--surface);
+  border:1px solid var(--line); border-radius:12px; padding:12px 16px; min-height:50px; margin:0 0 14px;
+}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 20px}
+button{font:inherit; color:inherit; cursor:pointer}
+.chip{padding:8px 16px; border-radius:999px; border:1px solid var(--line); background:var(--surface); min-height:44px}
+.chip[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600}
+ul.files{list-style:none; margin:0; padding:0; border-top:1px solid var(--line)}
+ul.files li{border-bottom:1px solid var(--line); padding:16px 4px}
+.title{font-weight:600; font-size:18px; margin:0}
+.meta{color:var(--muted); font-size:15px; margin:0 0 10px}
+.actions{display:flex; gap:10px}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:8px 22px;
+  border-radius:999px; text-decoration:none; font-weight:600; font-size:15px;
+  background:var(--accent); color:var(--accent-ink);
+}
+.btn.alt{background:var(--soft); color:var(--ink)}
+.empty{padding:28px 4px; color:var(--muted)}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+.note{margin:30px 0 0; font-size:14px; color:var(--muted)}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="brand" href="index.html">تمريض هب</a></header>
+
+  <h1>الملفات والمذكرات</h1>
+  <p class="lead">ابحث أو اختار المادة، وافتح الملف أو حمّله على جهازك.</p>
+
+  <input type="search" id="q" placeholder="ابحث باسم الملف" aria-label="ابحث باسم الملف">
+  <div class="chips" id="chips" role="group" aria-label="المواد"></div>
+
+  <ul class="files" id="list"></ul>
+  <p class="empty" id="empty" hidden></p>
+
+  <p class="note">الملفات هنا للدراسة والمراجعة. لو ملف يخصك وعايز تشيله، ابعت لنا وهنشيله فورًا.</p>
+</div>
+
+<script>
+let FILES = [];
+let subject = "الكل";
+const el = id => document.getElementById(id);
+
+fetch("files.json", { cache: "no-store" })
+  .then(r => { if (!r.ok) throw new Error("bad"); return r.json(); })
+  .then(data => { FILES = Array.isArray(data) ? data : []; init(); })
+  .catch(() => { FILES = []; init(true); });
+
+function init(failed){
+  const subjects = ["الكل", ...new Set(FILES.map(f => f.subject).filter(Boolean))];
+  const chips = el("chips"); chips.innerHTML = "";
+  subjects.forEach(s => {
+    const b = document.createElement("button");
+    b.className = "chip"; b.textContent = s;
+    b.setAttribute("aria-pressed", String(s === subject));
+    b.addEventListener("click", () => { subject = s; init(); });
+    chips.appendChild(b);
+  });
+  chips.hidden = FILES.length === 0;
+  render(failed);
+}
+
+function render(failed){
+  const term = el("q").value.trim().toLowerCase();
+  const list = el("list"); list.innerHTML = "";
+  const rows = FILES.filter(f =>
+    (subject === "الكل" || f.subject === subject) &&
+    (!term || (f.title || "").toLowerCase().includes(term))
+  );
+  rows.forEach(f => {
+    const li = document.createElement("li");
+    const t = document.createElement("p"); t.className = "title"; t.textContent = f.title || f.file;
+    const m = document.createElement("p"); m.className = "meta";
+    m.textContent = [f.subject, f.desc].filter(Boolean).join(" - ");
+    const a = document.createElement("div"); a.className = "actions";
+    const url = encodeURI(f.file);
+    const open = document.createElement("a"); open.className = "btn"; open.textContent = "فتح";
+    open.href = url; open.target = "_blank"; open.rel = "noopener";
+    const dl = document.createElement("a"); dl.className = "btn alt"; dl.textContent = "تحميل";
+    dl.href = url; dl.setAttribute("download", "");
+    a.append(open, dl);
+    li.append(t, m, a); list.appendChild(li);
+  });
+  const empty = el("empty");
+  if (rows.length === 0){
+    empty.hidden = false;
+    empty.textContent = failed ? "تعذر تحميل قائمة الملفات. حدّث الصفحة وجرّب تاني."
+      : FILES.length === 0 ? "لسه مفيش ملفات هنا. بنضيف الملفات قريبًا."
+      : "مفيش ملفات مطابقة للبحث.";
+  } else empty.hidden = true;
+}
+el("q").addEventListener("input", () => render());
+</script>
+</body>
+</html>
