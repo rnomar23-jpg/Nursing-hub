@@ -14,6 +14,7 @@
     "المجتمع": "Community", "اسأل زمايلك وشارك خبرتك": "Ask your peers and share your experience",
     "حسابي": "My Account", "سجّل دخولك أو اعمل حساب جديد": "Log in or create a new account",
     "متاح": "Available", "قريبًا": "Soon",
+    "عن المنصة": "About", "منشئ المحتوى": "Content creator", "للاستفسار:": "For inquiries:",
     "المحتوى هنا للتعلّم فقط، ولا يغني عن توجيه المشرف الإكلينيكي أو البروتوكولات المعتمدة في مكان التدريب.": "Content here is for learning only and does not replace your clinical supervisor's guidance or the approved protocols at your training site.",
     // الاختبارات
     "اختبارات | تمريض هب": "Quizzes | Nursing Hub",
