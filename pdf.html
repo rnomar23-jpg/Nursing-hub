@@ -114,7 +114,7 @@ function render(failed){
     open.href = url; open.target = "_blank"; open.rel = "noopener";
     const dl = document.createElement("a"); dl.className = "btn alt"; dl.textContent = "تحميل";
     dl.href = url; dl.setAttribute("download", "");
-    a.append(open, dl);
+    if (/\.html?$/i.test(f.file)) a.append(open); else a.append(open, dl);
     li.append(t, m, a); list.appendChild(li);
   });
   const empty = el("empty");
