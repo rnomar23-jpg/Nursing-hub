@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>نتائجي | تمريض هب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F2F6F7;--surface:#FFFFFF;--ink:#12303A;--muted:#4F6872;--line:#D3E0E3;--accent:#0E7C86;--accent-ink:#FFFFFF}
+@media (prefers-color-scheme: dark){:root{--bg:#0E1D22;--surface:#15292F;--ink:#E6F1F3;--muted:#9DB6BD;--line:#26414A;--accent:#4FC3CD;--accent-ink:#0E1D22}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.8;font-size:17px;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px 40px}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+.brand{font-weight:700;font-size:20px;color:inherit;text-decoration:none}
+h1{font-size:clamp(26px,7vw,36px);line-height:1.3;margin:10px 0 6px}
+.lead{color:var(--muted);margin:0 0 16px}
+.stats{display:flex;gap:10px;margin:0 0 18px}
+.stat{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.stat b{display:block;font-size:24px}.stat span{color:var(--muted);font-size:15px}
+ul{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+li{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line)}
+.sub{font-weight:600}.date{color:var(--muted);font-size:14px;display:block}
+.sc{font-weight:700;direction:ltr}
+.btn{display:inline-block;margin-top:14px;background:var(--accent);color:var(--accent-ink);text-decoration:none;border-radius:999px;padding:10px 24px;font-weight:600}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+[hidden]{display:none !important}
+</style>
+<script src="i18n.js" defer></script>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0E7C86">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="brand" href="index.html">تمريض هب</a></header>
+  <h1>نتائجي</h1>
+  <p class="lead" id="msg">كل اختباراتك المحفوظة وتقدمك في مكان واحد.</p>
+  <div class="stats" id="stats" hidden>
+    <div class="stat"><b id="n"></b><span>عدد الاختبارات</span></div>
+    <div class="stat"><b id="avg" dir="ltr"></b><span>متوسط النتيجة</span></div>
+  </div>
+  <ul id="list"></ul>
+  <a class="btn" id="act" href="quiz.html" hidden>اعمل اختبار</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+(async function () {
+  try {
+    const cfg = window.NH_CONFIG || {};
+    const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
+    const { data } = await sb.auth.getSession();
+    if (!data.session) { $("msg").textContent = "سجّل دخولك الأول عشان تشوف نتايجك."; $("act").href = "login.html"; $("act").textContent = "تسجيل الدخول"; $("act").hidden = false; return; }
+    const { data: rows, error } = await sb.from("quiz_results").select("subject,score,total,created_at").order("created_at", { ascending: false }).limit(50);
+    if (error) throw error;
+    if (!rows.length) { $("msg").textContent = "لسه ماعملتش أي اختبار."; $("act").hidden = false; return; }
+    const loc = localStorage.getItem("nh_lang") === "en" ? "en-GB" : "ar-EG";
+    let sum = 0;
+    rows.forEach(r => {
+      const pct = Math.round(100 * r.score / r.total); sum += pct;
+      const li = document.createElement("li"), l = document.createElement("div"), s = document.createElement("span"), d = document.createElement("span"), c = document.createElement("span");
+      s.className = "sub"; s.textContent = r.subject; d.className = "date"; d.textContent = new Date(r.created_at).toLocaleDateString(loc);
+      c.className = "sc"; c.textContent = r.score + "/" + r.total + " (" + pct + "%)";
+      l.append(s, d); li.append(l, c); $("list").appendChild(li);
+    });
+    $("n").textContent = rows.length; $("avg").textContent = Math.round(sum / rows.length) + "%";
+    $("stats").hidden = false; $("act").hidden = false;
+  } catch (e) { $("msg").textContent = "تعذر تحميل النتائج. جرّب تاني."; }
+})();
+</script>
+</body>
+</html>
