@@ -64,7 +64,20 @@ ul.sections a:focus-visible,.login:focus-visible{outline:3px solid var(--accent)
   border-inline-start:4px solid var(--accent); font-size:15px; color:var(--muted);
 }
 footer{padding:28px 0 36px; color:var(--muted); font-size:14px}
+.authed .login{display:none}
 </style>
+<script src="config.js"></script>
+<script>
+// لو المستخدم مسجّل دخول، نخفي زرار "تسجيل الدخول"
+try {
+  var u = (window.NH_CONFIG || {}).SUPABASE_URL || "";
+  var ref = u.replace("https://", "").split(".")[0];
+  if (ref && localStorage.getItem("sb-" + ref + "-auth-token")) {
+    document.documentElement.classList.add("authed");
+  }
+} catch (e) {}
+</script>
+<script src="i18n.js" defer></script>
 </head>
 <body>
 <div class="wrap">
