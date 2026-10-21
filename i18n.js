@@ -149,7 +149,25 @@
     "فقدان مفاجئ للرؤية": "Sudden loss of vision",
     "عطش خفيف": "Mild thirst",
     "جفاف الشفاه": "Dry lips",
-    "نعاس بعد الأكل": "Sleepiness after meals"
+    "نعاس بعد الأكل": "Sleepiness after meals",
+    "نتائجي": "My Results",
+    "نتائجي | تمريض هب": "My Results | Nursing Hub",
+    "سياسة الخصوصية": "Privacy Policy",
+    "سياسة الخصوصية | تمريض هب": "Privacy Policy | Nursing Hub",
+    "تم حفظ نتيجتك في حسابك.": "Your result was saved to your account.",
+    "سجّل دخولك عشان نحفظ نتايجك.": "Log in to save your results.",
+    "تعذر حفظ النتيجة.": "Couldn't save the result.",
+    "كل اختباراتك المحفوظة وتقدمك في مكان واحد.": "All your saved quizzes and progress in one place.",
+    "سجّل دخولك الأول عشان تشوف نتايجك.": "Log in first to see your results.",
+    "لسه ماعملتش أي اختبار.": "You haven't taken any quiz yet.",
+    "عدد الاختبارات": "Quizzes taken",
+    "متوسط النتيجة": "Average score",
+    "تعذر تحميل النتائج. جرّب تاني.": "Couldn't load results. Try again.",
+    "اعمل اختبار": "Take a quiz",
+    "الحالات السريرية | تمريض هب": "Clinical Cases | Nursing Hub",
+    "الحالات السريرية": "Clinical Cases",
+    "اختار حالة وقرر خطوة بخطوة إيه التصرف التمريضي الصح.": "Pick a case and decide, step by step, the right nursing action.",
+    "حالات تعليمية مبسطة مبنية على إرشادات معتمدة. لا تغني عن البروتوكولات والتوجيه الإكلينيكي في مكان التدريب.": "Simplified educational cases based on approved guidelines. They don't replace your site's protocols and clinical supervision."
   };
   var KEY = "nh_lang", lang = "ar", busy = false, orig = new WeakMap(), ATTRS = ["placeholder", "aria-label", "title"];
   try { lang = localStorage.getItem(KEY) || "ar"; } catch (e) {}
@@ -226,5 +244,6 @@
     }).observe(document.body, { childList: true, subtree: true, characterData: true });
     apply();
   }
+  if ("serviceWorker" in navigator) window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();

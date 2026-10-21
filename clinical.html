@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الحالات السريرية | تمريض هب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F2F6F7;--surface:#FFFFFF;--ink:#12303A;--muted:#4F6872;--line:#D3E0E3;--accent:#0E7C86;--accent-ink:#FFFFFF;--ok:#1B7F4B;--okbg:#DDF3E6;--bad:#B3261E;--badbg:#FBE3E1}
+@media (prefers-color-scheme: dark){:root{--bg:#0E1D22;--surface:#15292F;--ink:#E6F1F3;--muted:#9DB6BD;--line:#26414A;--accent:#4FC3CD;--accent-ink:#0E1D22;--ok:#7BDDA5;--okbg:#173B29;--bad:#FF9D96;--badbg:#44201D}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.8;font-size:17px;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px 40px}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+.brand{font-weight:700;font-size:20px;color:inherit;text-decoration:none}
+h1{font-size:clamp(26px,7vw,38px);line-height:1.3;margin:10px 0 6px}
+.lead{color:var(--muted);margin:0 0 18px}
+button{font:inherit;color:inherit;cursor:pointer}
+.case{display:block;width:100%;text-align:start;padding:14px 16px;margin:0 0 10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);min-height:60px}
+.case b{display:block;font-size:18px}.case span{color:var(--muted);font-size:15px}
+.intro{padding:14px 16px;background:var(--surface);border-inline-start:4px solid var(--accent);margin:0 0 16px}
+.intro b{display:block;margin:0 0 4px}
+.progress{color:var(--muted);font-size:15px;margin:0 0 6px}
+.q{font-size:20px;font-weight:600;margin:0 0 14px;line-height:1.6}
+.opts{display:grid;gap:10px;margin:0 0 16px}
+.opt{text-align:start;padding:12px 16px;min-height:52px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.opt.ok{background:var(--okbg);border-color:var(--ok);color:var(--ok);font-weight:600}
+.opt.bad{background:var(--badbg);border-color:var(--bad);color:var(--bad);font-weight:600}
+.opt:disabled{cursor:default}
+.why{padding:12px 16px;border-inline-start:4px solid var(--accent);background:var(--surface);color:var(--muted);font-size:16px;margin:0 0 16px}
+.go{background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:10px 26px;font-weight:600;min-height:46px;margin-inline-end:8px}
+.go.alt{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.score{font-size:26px;font-weight:700;margin:0 0 12px}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.note{margin:34px 0 0;font-size:14px;color:var(--muted)}
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0E7C86">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="i18n.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="brand" href="index.html">تمريض هب</a></header>
+  <h1>الحالات السريرية</h1>
+  <p class="lead">اختار حالة وقرر خطوة بخطوة إيه التصرف التمريضي الصح.</p>
+  <div id="app"></div>
+  <p class="note">حالات تعليمية مبسطة مبنية على إرشادات معتمدة. لا تغني عن البروتوكولات والتوجيه الإكلينيكي في مكان التدريب.</p>
+</div>
+<script>
+const CASES = [
+ { title: ["مريض في العيادة", "A patient in the clinic"],
+   intro: ["رجل عمره 52 سنة جاء للعيادة بصداع خفيف، ولم يُشخَّص بارتفاع الضغط من قبل. أنت الممرض المسؤول وستقيس ضغطه.", "A 52-year-old man comes to the clinic with a mild headache and has never been diagnosed with hypertension. You are the nurse in charge and will measure his blood pressure."],
+   steps: [
+    { q: ["ما التحضير الصحيح قبل قياس الضغط؟", "What is the correct preparation before measuring blood pressure?"],
+      o: [["يجلس 5 دقائق بهدوء، القدمان على الأرض والذراع في مستوى القلب", "He sits quietly for 5 minutes, feet on the floor, arm at heart level"], ["يقف ويتحدث أثناء القياس", "He stands and talks during the measurement"], ["يشرب قهوة قبل القياس مباشرة", "He drinks coffee right before the measurement"]], a: 0,
+      why: ["يلزم الراحة 5 دقائق على الأقل، وتجنب التدخين والكافيين 30 دقيقة قبل القياس، مع كفة مناسبة الحجم.", "He needs at least 5 minutes of rest, no smoking or caffeine for 30 minutes, and a cuff of the right size."] },
+    { q: ["القراءة الأولى 152/96 والثانية 150/94. ما الخطوة الصحيحة؟", "The first reading is 152/96 and the second is 150/94. What is the right step?"],
+      o: [["تشخيص ارتفاع الضغط فورًا وبدء الدواء", "Diagnose hypertension immediately and start medication"], ["تسجيل القراءات وقياس الذراع الأخرى وتأكيد التشخيص في زيارات منفصلة", "Record the readings, measure the other arm and confirm the diagnosis over separate visits"], ["تجاهل القراءة لأن الأعراض خفيفة", "Ignore the reading because the symptoms are mild"]], a: 1,
+      why: ["التشخيص لا يعتمد على قراءة واحدة: يلزم متوسط قراءتين أو أكثر في زيارتين أو أكثر، ويُقاس الذراعان في أول زيارة ويُعتمد الأعلى.", "Diagnosis is not based on a single reading: it needs the average of two or more readings at two or more visits, and both arms are measured at the first visit using the higher one."] },
+    { q: ["لو تأكدت القراءات عند حوالي 151/95، كيف يُصنَّف الضغط حسب JNC7؟", "If the readings are confirmed at about 151/95, how is it classified by JNC7?"],
+      o: [["ما قبل ارتفاع الضغط", "Prehypertension"], ["المرحلة الأولى", "Stage 1"], ["المرحلة الثانية", "Stage 2"]], a: 1,
+      why: ["المرحلة الأولى: انقباضي من 140 إلى 159 أو انبساطي من 90 إلى 99.", "Stage 1: systolic 140 to 159 or diastolic 90 to 99."] },
+    { q: ["أي نصيحة نمط حياة تقدمها له؟", "Which lifestyle advice do you give him?"],
+      o: [["تقليل الملح ونظام DASH ونشاط هوائي 30 دقيقة في معظم الأيام", "Less salt, the DASH diet and 30 minutes of aerobic activity on most days"], ["الراحة التامة وتجنب أي حركة", "Complete rest and avoiding all movement"], ["الاعتماد على الثوم والأعشاب لخفض الضغط", "Relying on garlic and herbs to lower the pressure"]], a: 0,
+      why: ["تغيير نمط الحياة جزء أساسي من العلاج. أما الأعشاب مثل الثوم فلا تخفض الضغط حسب الإرشادات.", "Lifestyle change is a core part of treatment. Herbal substances such as garlic do not lower blood pressure according to the guideline."] }
+   ] },
+ { title: ["ضغط مرتفع جدًا مع أعراض", "Very high pressure with symptoms"],
+   intro: ["سيدة عمرها 60 سنة مصابة بارتفاع الضغط منذ سنوات، وصلت الطوارئ بضغط 210/125 مع ألم في الصدر وتشوش في الوعي.", "A 60-year-old woman with long-standing hypertension arrives at the emergency department with a blood pressure of 210/125, chest pain and confusion."],
+   steps: [
+    { q: ["ما أنسب وصف للحالة؟", "What is the most appropriate description of this case?"],
+      o: [["ارتفاع ضغط عادي يُتابَع في العيادة", "Ordinary hypertension to be followed up in the clinic"], ["طارئ ارتفاع ضغط: ضغط شديد مع تلف حاد في عضو", "A hypertensive emergency: severe pressure with acute organ damage"], ["ضغط ما قبل المرض", "Prehypertension"]], a: 1,
+      why: ["الارتفاع الشديد مع تلف حاد في عضو (مثل ألم الصدر أو اعتلال الدماغ) يُعد طارئًا.", "Marked elevation with acute target-organ damage (such as chest pain or encephalopathy) is an emergency."] },
+    { q: ["ما التصرف الأول المناسب؟", "What is the appropriate first action?"],
+      o: [["إبلاغ الطبيب فورًا وتجهيز المريضة للتنويم والعلاج بالحقن", "Inform the doctor immediately and prepare her for admission and injectable treatment"], ["إعطاؤها قرص دواء وإرسالها للبيت", "Give her a tablet and send her home"], ["طلب العودة بعد أسبوع", "Ask her to come back in a week"]], a: 0,
+      why: ["حالات الطوارئ تحتاج دخول المستشفى والعلاج بالحقن، ولا يُؤجَّل التصرف.", "Emergencies need hospital admission and parenteral treatment, and action must not be delayed."] },
+    { q: ["ما الذي تراقبه وتبلغ عنه باستمرار؟", "What do you keep monitoring and reporting?"],
+      o: [["الضغط والنبض ومستوى الوعي وألم الصدر", "Blood pressure, pulse, level of consciousness and chest pain"], ["الوزن فقط", "Weight only"], ["درجة الحرارة فقط", "Temperature only"]], a: 0,
+      why: ["المتابعة المستمرة للضغط والنبض والوعي والألم تكشف أي تدهور مبكرًا.", "Continuous monitoring of pressure, pulse, consciousness and pain detects any deterioration early."] }
+   ] },
+ { title: ["ارتفاع الضغط والحمل", "Hypertension and pregnancy"],
+   intro: ["سيدة عمرها 30 سنة مصابة بارتفاع الضغط وتتناول دواء من مجموعة مثبطات الإنزيم المحوّل (ACEI). أخبرتك أنها تخطط للحمل.", "A 30-year-old woman with hypertension takes an ACE inhibitor (ACEI). She tells you she is planning a pregnancy."],
+   steps: [
+    { q: ["ما أهم ما تبلغ به الطبيب؟", "What is the most important thing to tell the doctor?"],
+      o: [["أنها تخطط للحمل، لأن ACEI لا تُستخدم في الحمل", "That she is planning pregnancy, because ACEIs are not used in pregnancy"], ["لا داعي للإبلاغ لأن الدواء آمن في الحمل", "No need to report because the drug is safe in pregnancy"], ["تنصحها بإيقاف الدواء بنفسها فورًا", "Advise her to stop the drug herself right away"]], a: 0,
+      why: ["ACEI وARB لا تُستخدم أثناء الحمل بسبب احتمال تشوهات الجنين، ويقرر الطبيب البديل ولا توقف المريضة الدواء من نفسها.", "ACEIs and ARBs are not used in pregnancy because of possible fetal defects; the doctor chooses the alternative and the patient should not stop on her own."] },
+    { q: ["أي أدوية تُفضَّل غالبًا أثناء الحمل حسب الإرشادات؟", "Which drugs are usually preferred in pregnancy according to the guideline?"],
+      o: [["ميثيل دوبا وحاصرات بيتا وموسعات الأوعية", "Methyldopa, beta blockers and vasodilators"], ["مثبطات ACE", "ACE inhibitors"], ["حاصرات مستقبلات الأنجيوتنسين (ARB)", "Angiotensin receptor blockers (ARBs)"]], a: 0,
+      why: ["هذه الأدوية الأنسب لسلامة الجنين، ويحددها الطبيب.", "These are the safer choices for the fetus, and the doctor decides."] },
+    { q: ["بعد الأسبوع 20 من الحمل، أي علامة تستدعي تقييمًا عاجلًا؟", "After week 20 of pregnancy, which sign needs urgent evaluation?"],
+      o: [["ارتفاع جديد أو متزايد في الضغط مع بروتين في البول", "New or worsening high blood pressure with protein in the urine"], ["صداع خفيف مرة واحدة", "A single mild headache"], ["غثيان صباحي خفيف", "Mild morning nausea"]], a: 0,
+      why: ["هذه علامات تسمم الحمل، وقد تتطور لحالة طارئة تحتاج تنويمًا.", "These are signs of pre-eclampsia, which can become an emergency needing admission."] }
+   ] }
+];
+const app = document.getElementById("app");
+const L = () => document.documentElement.lang === "en" ? 1 : 0;
+const t = p => p[L()];
+let ci = null, si = 0, sc = 0, picked = null;
+function h(tag, text, cls){ const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
+function render(){
+  app.innerHTML = "";
+  if (ci === null){
+    CASES.forEach((c, n) => {
+      const b = h("button", null, "case"); b.append(h("b", t(c.title)), h("span", c.steps.length + (L() ? " steps" : " خطوات")));
+      b.addEventListener("click", () => { ci = n; si = 0; sc = 0; picked = null; render(); });
+      app.appendChild(b);
+    });
+    return;
+  }
+  const c = CASES[ci], total = c.steps.length;
+  const intro = h("div", null, "intro"); intro.append(h("b", t(c.title)), h("span", t(c.intro))); app.appendChild(intro);
+  if (si >= total){
+    app.appendChild(h("p", (L() ? "You finished the case: " + sc + " of " + total + " correct" : "أنهيت الحالة: " + sc + " من " + total + " إجابات صحيحة"), "score"));
+    const again = h("button", L() ? "Restart this case" : "ابدأ الحالة من الأول", "go"); again.addEventListener("click", () => { si = 0; sc = 0; picked = null; render(); });
+    const other = h("button", L() ? "Pick another case" : "اختار حالة تانية", "go alt"); other.addEventListener("click", () => { ci = null; render(); });
+    app.append(again, other); return;
+  }
+  const s = c.steps[si];
+  app.appendChild(h("p", L() ? "Step " + (si + 1) + " of " + total : "الخطوة " + (si + 1) + " من " + total, "progress"));
+  app.appendChild(h("p", t(s.q), "q"));
+  const box = h("div", null, "opts");
+  s.o.forEach((o, n) => {
+    const b = h("button", null, "opt"); let txt = t(o);
+    if (picked !== null){ b.disabled = true; if (n === s.a){ b.classList.add("ok"); txt = "✓ " + txt; } else if (n === picked){ b.classList.add("bad"); txt = "✗ " + txt; } }
+    b.textContent = txt;
+    b.addEventListener("click", () => { if (picked !== null) return; picked = n; if (n === s.a) sc++; render(); });
+    box.appendChild(b);
+  });
+  app.appendChild(box);
+  if (picked !== null){
+    app.appendChild(h("p", t(s.why), "why"));
+    const nx = h("button", si + 1 < total ? (L() ? "Next step" : "الخطوة التالية") : (L() ? "See result" : "شوف النتيجة"), "go");
+    nx.addEventListener("click", () => { si++; picked = null; render(); });
+    app.appendChild(nx);
+  }
+}
+render();
+new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+</script>
+</body>
+</html>
